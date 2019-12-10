@@ -1,7 +1,7 @@
 # Build A BSD
 
-License: 2-Clause BSD License
-Language: /bin/sh on HardenedBSD
+* License: 2-Clause BSD License
+* Language: /bin/sh on HardenedBSD
 
 This collection of scripts provides automation for installing a
 customized, templated BSD installation onto a physical medium. This
