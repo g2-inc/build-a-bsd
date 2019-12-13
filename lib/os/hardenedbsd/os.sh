@@ -1,4 +1,3 @@
-#!/bin/sh
 #-
 # Copyright (c) 2019 Huntington Ingalls Industries
 # Author: Shawn Webb <shawn.webb@hii-tsd.com>
@@ -24,50 +23,46 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-bab_get_topdir() {
-	local self
-
-	[ ! -z "${TOPDIR}" ] && echo ${TOPDIR} && return 0
-
-	self=${1}
-
-	echo $(realpath $(dirname ${self}))
-	return ${?}
-}
-
-bab_usage() {
-	echo "USAGE: ${TOPDIR}/bin/bab.sh verb"
-}
-
-_bab_sanity_checks() {
-	return 0
-}
-
-TOPDIR=$(realpath $(bab_get_topdir ${0})/..)
-
-main() {
+os_sanity_checks() {
 	local res
-	local self
-	local verb
 
-	self=${1}
-	shift
+	res=0
+	case "$(uname)" in
+		FreeBSD)
+			# We require building on FreeBSD or
+			# HardenedBSD.
+			;;
+		*)
+			res=1
+			;;
+	esac
 
-	while getopts 'v' o; do
-		case "${o}" in
-			v)
-				;;
-		esac
-	done
-	shift $((${OPTIND} - 1))
-
-	verb=${1}
-	[ -z "${verb}" ] && bab_usage
-
-	_bab_sanity_checks ${verb} || exit 1
+	[ ! -d ${BAB_SCRATCH_DIR} ] && mkdir -p ${BAB_SCRATCH_DIR}/tmp
+	res=${?}; [ ${res} -gt 0 ] && return ${res}
 
 	return ${res}
 }
 
-main ${0} $*
-exit ${?}
+os_host_install_dependencies() {
+	return 0
+}
+
+os_fetch_distribution() {
+	fetch -o ${BAB_SCRATCH_DIR}/tmp/base.txz \
+	    ${BAB_DOWNLOAD_BASE_URL}/base.txz
+	return ${?}
+}
+
+os_extract_rootfs() {
+	tar -xpf ${BAB_SCRATCH_DIR}/tmp/base.txz \
+	    -C ${BAB_ROOTFS_DIR}
+	return ${?}
+}
+
+os_guest_preinstall_packages() {
+	return 0
+}
+
+os_guest_install_packages() {
+	return 0
+}
